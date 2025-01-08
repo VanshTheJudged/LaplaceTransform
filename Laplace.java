@@ -99,6 +99,105 @@ public class Laplace {
         String fresult = result1+"+"+result2;
         return fresult;
     }
+    public String timeshift(String x) {
+    boolean isExtractingA = false;
+    boolean isExtractingF = false;
+    StringBuilder a = new StringBuilder(); // Extract 'a' (shift value)
+    StringBuilder t = new StringBuilder(); // Extract 'f(t)'
+    
+    for (int i = 0; i < x.length(); i++) {
+        char currentChar = x.charAt(i);
+        
+        // Extract 'a' after '-'
+        if (currentChar == '-') {
+            isExtractingA = true;
+            continue;
+        } 
+        if (currentChar == ')') {
+            isExtractingA = false;
+        }
+        if (isExtractingA && (Character.isDigit(currentChar) || currentChar == '-')) {
+            a.append(currentChar);
+            continue;
+        }
+        
+        // Extract 'f(t)' inside parentheses
+        if (currentChar == '(') {
+            isExtractingF = true;
+            continue;
+        } 
+        if (currentChar == '-') {
+            isExtractingF = false;
+        }
+        if (isExtractingF && currentChar != '(') {
+            t.append(currentChar);
+        }
+    }
+    
+    // Validate and build the result
+    String result = "e^(-" + a.toString() + "s) * " + gettranform(t.toString());
+    return result;
+}
+
+public String frequencyShift(String x) {
+    boolean isExtractingA = false;
+    StringBuilder a = new StringBuilder();
+    for(int i =0;i<x.length();i++){
+        char currentChar = x.charAt(i);
+        if(currentChar=='('){
+            isExtractingA=true;
+            continue;
+        }
+        if(currentChar==')'){
+            isExtractingA=false;
+            break;
+        }
+        if(isExtractingA){
+            a.append(currentChar);
+        }
+    }
+
+    if(a.length() == 0) {
+    return "Invalid input format";
+    }
+
+    String result;
+    if(a.charAt(0)=='-'){
+        result = "F(s+"+a.toString()+')';
+    }
+    else{
+        result = "F(s-"+a.toString()+')';
+    } 
+    return result;
+   }
+    
+    public String replaceS(String F_s, String a) {
+    String transformed_F_s = F_s.replace("s", "s/" + a);  // Replace 's' with 's/a'
+    return transformed_F_s;
+}
+
+    public String scalingTheo(String x, String a) {
+    StringBuilder result1 = new StringBuilder();
+
+    if (a.charAt(0) == '-') {
+        for (int i = 1; i < a.length(); i++) {
+            result1.append(a.charAt(i));
+        }
+        result1.insert(0, "1/");  
+    } else {
+        result1.append("1/").append(a);
+    }
+    
+    String result2 = gettranform(x);
+    
+    String adResult = replaceS(result2,a);
+
+    String fresult = result1.toString() + " * " + adResult;
+    
+    return fresult;
+}
+
+
     public void addTransform(String function, String result) {
         transforms.put(function, result);
     }
